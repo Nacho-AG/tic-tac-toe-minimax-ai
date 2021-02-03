@@ -6,6 +6,8 @@ main {
     position: absolute;
     top: 50%;
     transform: translate(0%, -50%);
+    width: 100%;
+    height: 100%;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -17,7 +19,7 @@ main {
     height: 75vmin;
 
     margin: 5vmin;
-    
+
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -29,6 +31,11 @@ main {
 .cell {
     width: 33%;
     height: 33%;
+}
+
+.cell img {
+    min-width: 100%;
+    max-width: 100%;
 }
 
 #info {
