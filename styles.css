@@ -62,3 +62,12 @@ main {
     display: flex;
     flex-direction: column;
 }
+
+.token-icon {
+    border-radius: 5px;
+    width: 20%;
+}
+
+.token-icon.selected {
+    background-color: rgba(128, 128, 128, 0.1);
+}

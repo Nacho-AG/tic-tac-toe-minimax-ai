@@ -3,6 +3,8 @@ const gameController = (function() {
     // Visual representation of cells in the board
     const _cells = document.querySelectorAll(".cell");
     const difficultyInput = document.querySelector("#difficulty");
+    const _crossButton = document.querySelector("#cross-button");
+    const _circleButton = document.querySelector("#circle-button");
 
     let _playerSign = 1;
 
@@ -25,13 +27,18 @@ const gameController = (function() {
         console.log(`Difficulty level: ${_difficulty}`);
     });
 
+    const _reset = () => {
+        _states.forEach(item => item = 0);
+        _gameRenderer.reset();
+    };
+
     const _computer = (function() {
-        const _getChilds = function(state, playerSign) {
+        const _getChilds = function(state, token) {
             let childs = [];
             for(let i=0; i<state.length; i++){
                 if (state[i] === 0) {
                     let newChild = [...state];
-                    newChild.splice(i, 1, playerSign);
+                    newChild.splice(i, 1, token);
                     childs.push(newChild);
                 }
             }
@@ -116,11 +123,17 @@ const gameController = (function() {
 
         const _generateBestMove = () => {
             console.log("Best Move");
-            const childs = _getChilds(_states, -1);
+            const childs = _getChilds(_states, _playerSign * -1);
             let bestValue = 100;
             let bestChilds = []
             for (let child of childs) {
-                const childValue = _minimax(child, true);
+                let maxPlayer;
+                if (_playerSign === 1) {
+                    maxPlayer = true;
+                } else {
+                    maxPlayer = false;
+                }
+                const childValue = _minimax(child, maxPlayer);
                 if (childValue === bestValue) {
                     bestChilds.push(child);
                 } else if (childValue < bestValue){
@@ -177,7 +190,15 @@ const gameController = (function() {
             console.log(`Rendering cell ${index} with ${newImg}`);
         };
 
-        return {renderCell};
+        const reset = function() {
+            _cells.forEach(cell => {
+                const img = cell.querySelector("img");
+                img.setAttribute("src", "");
+            });
+            console.log("All cells cleared");
+        }
+
+        return {renderCell, reset};
     })();
 
     const _checkForWin = function(state) {
@@ -239,4 +260,24 @@ const gameController = (function() {
             }
         }
     }))
+
+    // Add the button listeners. The player can choose between "cross", the 
+    // token that starts the game and "circles".
+    _crossButton.addEventListener("click", () => {
+        if (_crossButton.classList.contains("selected")) return;
+        else {
+            _circleButton.classList.remove("selected");
+            _crossButton.classList.add("selected");
+        }
+        _reset();
+    });
+    _circleButton.addEventListener("click", () => {
+        if (_circleButton.classList.contains("selected")) return;
+        else {
+            _crossButton.classList.remove("selected");
+            _circleButton.classList.add("selected");
+        }
+        _reset();
+        _computer.move();
+    });
 })();
