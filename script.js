@@ -2,8 +2,9 @@
 const gameController = (function() {
     // Visual representation of cells in the board
     const _cells = document.querySelectorAll(".cell");
+    const difficultyInput = document.querySelector("#difficulty");
 
-    let _playerState = 1;
+    let _playerSign = 1;
 
     /**
      * The states:
@@ -13,12 +14,18 @@ const gameController = (function() {
      */
     const _states = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-    let _difficulty = 10;
+    const _tokens = {
+        "1": "Player",
+        "-1": "Computer",
+    }
 
-    const _computer = (function(difficulty) {
-        // The level of difficulty will determine the chance of
-        // making the best move. Higher the level higher the chances.
-        const _level = difficulty * 0.1;
+    let _difficulty = 1;
+    difficultyInput.addEventListener("change", () => {
+        _difficulty = difficultyInput.value;
+        console.log(`Difficulty level: ${_difficulty}`);
+    });
+
+    const _computer = (function() {
         const _getChilds = function(state, playerSign) {
             let childs = [];
             for(let i=0; i<state.length; i++){
@@ -41,42 +48,45 @@ const gameController = (function() {
             const _terminalNode = function(state) {
                 let terminal = false;
                 let value = null;
-                if (!state.includes(0)) {
-                    //DRAW
-                    terminal=true;
-                    value=0;
-                    return [terminal, value];
-                } else {
-                    // ROWS WIN
-                    if ([state[0], state[1], state[2]].every((item) => {
-                        return item === state[0] && item !== 0;
-                    })) {value = state[0], terminal = true}
-                    else if ([state[3], state[4], state[5]].every((item) => {
-                        return item === state[3] && item !== 0;
-                    })) {value = state[3], terminal = true}
-                    else if ([state[6], state[7], state[8]].every((item) => {
-                        return item === state[6] && item !== 0;
-                    })) {value = state[6], terminal = true}
-                    // COLUMNS WIN
-                    else if ([state[0], state[3], state[6]].every((item) => {
-                        return item === state[0] && item !== 0;
-                    })) {value = state[0], terminal = true}
-                    else if ([state[1], state[4], state[7]].every((item) => {
-                        return item === state[1] && item !== 0;
-                    })) {value = state[1], terminal = true}
-                    else if ([state[2], state[5], state[8]].every((item) => {
-                        return item === state[2] && item !== 0;
-                    })) {value = state[2], terminal = true}
-                    //DIAGONALS WIN
-                    else if ([state[0], state[4], state[8]].every((item) => {
-                        return item === state[0] && item !== 0;
-                    })) {value = state[0], terminal = true}
-                    else if ([state[2], state[4], state[6]].every((item) => {
-                        return item === state[2] && item !== 0;
-                    })) {value = state[2], terminal = true}
-                    else {value = null, terminal = false};
-                    return [terminal, value];
-                }
+                // ROWS WIN
+                if ([state[0], state[1], state[2]].every((item) => {
+                    return item === state[0] && item !== 0;
+                })) {value = state[0], terminal = true}
+                else if ([state[3], state[4], state[5]].every((item) => {
+                    return item === state[3] && item !== 0;
+                })) {value = state[3], terminal = true}
+                else if ([state[6], state[7], state[8]].every((item) => {
+                    return item === state[6] && item !== 0;
+                })) {value = state[6], terminal = true}
+                // COLUMNS WIN
+                else if ([state[0], state[3], state[6]].every((item) => {
+                    return item === state[0] && item !== 0;
+                })) {value = state[0], terminal = true}
+                else if ([state[1], state[4], state[7]].every((item) => {
+                    return item === state[1] && item !== 0;
+                })) {value = state[1], terminal = true}
+                else if ([state[2], state[5], state[8]].every((item) => {
+                    return item === state[2] && item !== 0;
+                })) {value = state[2], terminal = true}
+                //DIAGONALS WIN
+                else if ([state[0], state[4], state[8]].every((item) => {
+                    return item === state[0] && item !== 0;
+                })) {value = state[0], terminal = true}
+                else if ([state[2], state[4], state[6]].every((item) => {
+                    return item === state[2] && item !== 0;
+                })) {value = state[2], terminal = true}
+                else {
+                    if (!state.includes(0)) {
+                        // DRAW
+                        terminal=true;
+                        value=0;
+                    } else {
+                        // NOT END NODE
+                        value = null;
+                        terminal = false;
+                    }
+                };
+                return [terminal, value];
             };
 
             const [terminal, value] = _terminalNode(state);
@@ -105,12 +115,12 @@ const gameController = (function() {
         };
 
         const _generateBestMove = () => {
+            console.log("Best Move");
             const childs = _getChilds(_states, -1);
             let bestValue = 100;
             let bestChilds = []
             for (let child of childs) {
                 const childValue = _minimax(child, true);
-                console.log(child, childValue);
                 if (childValue === bestValue) {
                     bestChilds.push(child);
                 } else if (childValue < bestValue){
@@ -130,23 +140,24 @@ const gameController = (function() {
         }
 
         const _generateRandomMove = () => {
+            console.log("Random Move");
             let x = Math.floor(Math.random() * 3);
             let y = Math.floor(Math.random() * 3);
             while(_states[3*x + y] !== 0) {
                 x = Math.floor(Math.random() * 3);
                 y = Math.floor(Math.random() * 3);
             }
-            index = 3 * x + y;
-            _states[index] = _playerState * -1;
+            let index = 3 * x + y;
+            _states[index] = _playerSign * -1;
             _gameRenderer.renderCell(index);
         }
         const move = () => {
             const randomMove = Math.random();
-            if (randomMove >= _level) _generateRandomMove();
+            if (randomMove >= (_difficulty * 0.1)) _generateRandomMove();
             else _generateBestMove();
         }
         return {move};
-    })(_difficulty);
+    })();
 
     const _gameRenderer = (function() {
         // VISUAL IMAGE OF TOKENS
@@ -169,14 +180,63 @@ const gameController = (function() {
         return {renderCell};
     })();
 
+    const _checkForWin = function(state) {
+        let value = null;
+        let terminal = false;
+        // ROWS WIN
+        if ([state[0], state[1], state[2]].every((item) => {
+            return item === state[0] && item !== 0;
+        })) {value = state[0], terminal = true}
+        else if ([state[3], state[4], state[5]].every((item) => {
+            return item === state[3] && item !== 0;
+        })) {value = state[3], terminal = true}
+        else if ([state[6], state[7], state[8]].every((item) => {
+            return item === state[6] && item !== 0;
+        })) {value = state[6], terminal = true}
+        // COLUMNS WIN
+        else if ([state[0], state[3], state[6]].every((item) => {
+            return item === state[0] && item !== 0;
+        })) {value = state[0], terminal = true}
+        else if ([state[1], state[4], state[7]].every((item) => {
+            return item === state[1] && item !== 0;
+        })) {value = state[1], terminal = true}
+        else if ([state[2], state[5], state[8]].every((item) => {
+            return item === state[2] && item !== 0;
+        })) {value = state[2], terminal = true}
+        //DIAGONALS WIN
+        else if ([state[0], state[4], state[8]].every((item) => {
+            return item === state[0] && item !== 0;
+        })) {value = state[0], terminal = true}
+        else if ([state[2], state[4], state[6]].every((item) => {
+            return item === state[2] && item !== 0;
+        })) {value = state[2], terminal = true}
+        else {
+            if (!state.includes(0)) {
+                // DRAW
+                terminal=true;
+                value=0;
+            } else {
+                // NOT END NODE
+                value = null;
+                terminal = false;
+            }
+        };
+        return [terminal, value];
+    };
+
     // Add the click event listener in the cells
     _cells.forEach((cell, index) => cell.addEventListener("click", () => {
         // Only accept the move if the position is empty
         if (_states[index] === 0) {
-            _states[index] = _playerState;
+            _states[index] = _playerSign;
             _gameRenderer.renderCell(index);
+            let [win, winner] = _checkForWin(_states);
+            if (win) console.log(_tokens[winner]);
+            if (_states.includes(0)) {
+                _computer.move();
+                let [win, winner] = _checkForWin(_states);
+                if (win) console.log(_tokens[winner]);
+            }
         }
-
-        if (_states.includes(0)) _computer.move();
     }))
 })();

@@ -31,14 +31,14 @@ main {
 
 .cell {
     margin: auto;
-    background-color: rgba(128, 128, 128, 0.3);
+    background-color: rgba(128, 128, 128, 0.1);
     border-radius: 5px;
     width: 33%;
     height: 33%;
 }
 
 .cell:hover {
-    background-color: rgba(80, 124, 117, 1);
+    background-color: rgba(80, 124, 117, 0.8);
 }
 
 .cell img {
@@ -48,7 +48,7 @@ main {
 }
 
 .cell img:hover {
-    background-color: rgba(124, 83, 80, 1);
+    background-color: rgba(124, 83, 80, 0.8);
 }
 
 #info {
