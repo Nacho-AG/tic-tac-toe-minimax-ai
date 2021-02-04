@@ -25,17 +25,30 @@ main {
     justify-content: center;
     align-content: center;
     align-items: center;
+    gap: 1px;
 
 }
 
 .cell {
+    margin: auto;
+    background-color: rgba(128, 128, 128, 0.3);
+    border-radius: 5px;
     width: 33%;
     height: 33%;
 }
 
+.cell:hover {
+    background-color: rgba(80, 124, 117, 1);
+}
+
 .cell img {
+    border-radius: 5px;
     min-width: 100%;
     max-width: 100%;
+}
+
+.cell img:hover {
+    background-color: rgba(124, 83, 80, 1);
 }
 
 #info {
