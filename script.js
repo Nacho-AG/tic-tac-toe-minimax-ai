@@ -7,6 +7,8 @@ const gameController = (function() {
     const _circleButton = document.querySelector("#circle-button");
 
     let _playerSign = 1;
+    let _gameEnded = false;
+    let _debug = false;
 
     /**
      * The states:
@@ -18,6 +20,7 @@ const gameController = (function() {
 
     const _tokens = {
         "1": "Player",
+        "0": "Draw",
         "-1": "Computer",
     }
 
@@ -28,7 +31,8 @@ const gameController = (function() {
     });
 
     const _reset = () => {
-        _states.forEach(item => item = 0);
+        _gameEnded = false;
+        _states.forEach((_, index) => _states[index] = 0);
         _gameRenderer.reset();
     };
 
@@ -122,7 +126,7 @@ const gameController = (function() {
         };
 
         const _generateBestMove = () => {
-            console.log("Best Move");
+            if (_debug) console.log("Best Move");
             const childs = _getChilds(_states, _playerSign * -1);
             let bestValue = 100;
             let bestChilds = []
@@ -153,7 +157,7 @@ const gameController = (function() {
         }
 
         const _generateRandomMove = () => {
-            console.log("Random Move");
+            if (_debug) console.log("Random Move");
             let x = Math.floor(Math.random() * 3);
             let y = Math.floor(Math.random() * 3);
             while(_states[3*x + y] !== 0) {
@@ -187,7 +191,7 @@ const gameController = (function() {
             if (_states[index] === 1) newImg = CROSS;
             if (_states[index] === -1) newImg = CIRCLE;
             img.setAttribute("src", newImg);
-            console.log(`Rendering cell ${index} with ${newImg}`);
+            if (_debug) console.log(`Rendering cell ${index} with ${newImg}`);
         };
 
         const reset = function() {
@@ -247,16 +251,26 @@ const gameController = (function() {
 
     // Add the click event listener in the cells
     _cells.forEach((cell, index) => cell.addEventListener("click", () => {
-        // Only accept the move if the position is empty
-        if (_states[index] === 0) {
-            _states[index] = _playerSign;
-            _gameRenderer.renderCell(index);
-            let [win, winner] = _checkForWin(_states);
-            if (win) console.log(_tokens[winner]);
-            if (_states.includes(0)) {
-                _computer.move();
+        // Check if the match is over
+        if (!_gameEnded) {
+            // Only accept the move if the position is empty
+            if (_states[index] === 0) {
+                _states[index] = _playerSign;
+                _gameRenderer.renderCell(index);
                 let [win, winner] = _checkForWin(_states);
-                if (win) console.log(_tokens[winner]);
+                if (win) {
+                    console.log(_tokens[winner]);
+                    _gameEnded = true;
+                } else {
+                    if (_states.includes(0)) {
+                        _computer.move();
+                        let [win, winner] = _checkForWin(_states);
+                        if (win) {
+                            console.log(_tokens[winner]);
+                            _gameEnded = true;
+                        }
+                    }
+                }
             }
         }
     }))
